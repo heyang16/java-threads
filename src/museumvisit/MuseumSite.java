@@ -16,14 +16,15 @@ public abstract class MuseumSite {
     this.exitTurnstiles = new ArrayList<>();
   }
 
-  synchronized public boolean hasAvailability() {
+  public synchronized boolean hasAvailability() {
     return true;
   }
 
-  synchronized public void enter() {
+  public synchronized void enter() {
     occupancy += 1;
   }
-  synchronized public void exit() {
+
+  public synchronized void exit() {
     assert occupancy > 0;
     occupancy -= 1;
   }

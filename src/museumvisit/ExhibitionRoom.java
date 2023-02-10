@@ -15,7 +15,7 @@ public class ExhibitionRoom extends MuseumSite {
   }
 
   @Override
-  synchronized public boolean hasAvailability() {
+  public synchronized boolean hasAvailability() {
     return occupancy < capacity;
   }
 }

@@ -11,16 +11,27 @@ public class Turnstile {
     assert !originRoom.equals(destinationRoom);
     this.originRoom = originRoom;
     this.destinationRoom = destinationRoom;
+    originRoom.addExitTurnstile(this);
     // complete here if needed
   }
 
   public Optional<MuseumSite> passToNextRoom() {
-    if (destinationRoom.hasAvailability()) {
-      originRoom.exit();
-      destinationRoom.enter();
-      return Optional.of(destinationRoom);
-    } else {
-      return Optional.empty();
+    MuseumSite firstLock = originRoom;
+    MuseumSite secondLock = destinationRoom;
+    if (originRoom.hashCode() > destinationRoom.hashCode()) {
+      firstLock = destinationRoom;
+      secondLock = originRoom;
+    }
+    synchronized (firstLock) {
+      synchronized (secondLock) {
+        if (destinationRoom.hasAvailability()) {
+          originRoom.exit();
+          destinationRoom.enter();
+          return Optional.of(destinationRoom);
+        } else {
+          return Optional.empty();
+        }
+      }
     }
   }
 

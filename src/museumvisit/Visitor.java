@@ -13,14 +13,19 @@ public class Visitor implements Runnable {
   public Visitor(String name, MuseumSite initialRoom) {
     this.name = name;
     this.currentRoom = initialRoom;
+    currentRoom.enter();
   }
 
   public void run() {
-    currentRoom.enter();
     while (thereAreMoreSitesToVisit()) {
       simulateVisitToCurrentRoom();
       Turnstile turnstile = pickRandomTurnstile();
-      goToNextRoom(turnstile);
+      Optional<MuseumSite> nextRoom = turnstile.passToNextRoom();
+      if (nextRoom.isPresent()) {
+        currentRoom = nextRoom.get();
+      } else {
+        waitSomeTimeBeforeRetrying();
+      }
       /*
        * 1. pick a random turnstile
        * 2. try to go through it.
@@ -29,7 +34,6 @@ public class Visitor implements Runnable {
        * 2b) if unsuccessful (i.e., passToNextRoom() returned an empty Optional),
        * waitSomeTimeBeforeRetrying(), and then retry from step 1.
        */
-
     }
   }
 
@@ -53,16 +57,6 @@ public class Visitor implements Runnable {
     try {
       Thread.sleep(randomVisitTimeInMillis);
     } catch (InterruptedException e) {
-    }
-  }
-
-  private void goToNextRoom(Turnstile turnstile) {
-    Optional<MuseumSite> nextRoom = turnstile.passToNextRoom();
-    if (nextRoom.isPresent()) {
-      currentRoom = nextRoom.get();
-    } else {
-      waitSomeTimeBeforeRetrying();
-      goToNextRoom(turnstile);
     }
   }
 

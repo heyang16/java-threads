@@ -1,6 +1,9 @@
 package museumvisit;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 public class Museum {
 
@@ -17,11 +20,27 @@ public class Museum {
   public static void main(String[] args) {
     final int numberOfVisitors = 100; // Your solution has to work with any
     // number of visitors
-    final Museum museum = buildSimpleMuseum(); // buildLoopyMuseum();
+    final Museum museum = buildLoopyMuseum(); // buildLoopyMuseum();
 
     // create the threads for the visitors and get them moving
+    List<Thread> visitors = new ArrayList<>();
+    IntStream.range(0, numberOfVisitors)
+        .sequential()
+        .forEach(
+            i -> {
+              Thread visitorThread = new Thread(new Visitor("Vis" + i, museum.getEntrance()));
+              visitors.add(visitorThread);
+              visitorThread.start();
+            });
 
-    // wait for them to complete their visit
+    // Wait for all visitors to complete their visit
+    visitors.forEach(
+        v -> {
+          try {
+            v.join();
+          } catch (InterruptedException e) {
+          }
+        });
 
     // Checking no one is left behind
     if (museum.getExit().getOccupancy() == numberOfVisitors) {
@@ -49,8 +68,8 @@ public class Museum {
     ExhibitionRoom exhibitionRoom = new ExhibitionRoom("Exhibition Room", 10);
 
     // Build turnstiles
-    entrance.addExitTurnstile(new Turnstile(entrance, exhibitionRoom));
-    exhibitionRoom.addExitTurnstile(new Turnstile(exhibitionRoom, exit));
+    Turnstile turnstile1 = new Turnstile(entrance, exhibitionRoom);
+    Turnstile turnstile2 = (new Turnstile(exhibitionRoom, exit));
 
     return new Museum(entrance, exit, Set.of(exhibitionRoom));
   }
@@ -63,10 +82,10 @@ public class Museum {
     ExhibitionRoom whales = new ExhibitionRoom("Whales", 10);
 
     // Build turnstiles
-    entrance.addExitTurnstile(new Turnstile(entrance, venom));
-    venom.addExitTurnstile(new Turnstile(venom, exit));
-    venom.addExitTurnstile(new Turnstile(venom, whales));
-    whales.addExitTurnstile(new Turnstile(whales, venom));
+    Turnstile turnstile1 = new Turnstile(entrance, venom);
+    Turnstile turnstile2 = new Turnstile(venom, whales);
+    Turnstile turnstile3 = new Turnstile(whales, venom);
+    Turnstile turnstile4 = new Turnstile(venom, exit);
 
     return new Museum(entrance, exit, Set.of(venom, whales));
   }
